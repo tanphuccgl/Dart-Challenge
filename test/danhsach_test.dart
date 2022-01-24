@@ -11,5 +11,9 @@ void main() {
     test('Input = list [-2,4,-5,0,0,0,0], list [-3,5,-9,0]', () {
       expect(filterDuplicates([-2,4,-5,0,0,0,0], [-3,5,-9,0]), [0]);
     });
+    test('Input = list [], list []', () {
+      expect(filterDuplicates([], []), []);
+    });
+   
   });
 }
