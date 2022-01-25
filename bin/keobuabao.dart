@@ -15,108 +15,61 @@ class GameTurn {
   static const bua = 2;
   static const bao = 3;
   static const exit = 0;
+
+  static String getName(int number) {
+    switch (number) {
+      case 1:
+        return "Kéo";
+      case 2:
+        return "Búa";
+      case 3:
+        return "Bao";
+    }
+    return "N/A";
+  }
 }
 
 class GameResult {
-  static const thang = 4;
-  static const thua = 5;
-  static const hoa = 6;
+  static const thang = 1;
+  static const thua = 2;
+  static const hoa = 3;
+
+  static String getName(int number) {
+    switch (number) {
+      case 1:
+        return "Thắng";
+      case 2:
+        return "Thua";
+      case 3:
+        return "Hòa";
+    }
+    return "N/A";
+  }
 }
 
-void score(int win, int lose) {
-  if (win >= lose) {
-    print("Tổng điểm: ${win - lose} ($win win/ $lose lose)");
-  } else {
-    print("Tổng điểm: 0 ($win win/ $lose lose)");
-  }
+void showFinalScore(int win, int lose) {
+  print("Tổng điểm: ${win - lose} ($win win/ $lose lose)");
 }
 
 int rule(int player, int machine) {
   if (player == machine) {
     return GameResult.hoa;
-  } else if (player > machine) {
-    if (player == GameTurn.bao && machine == GameTurn.keo) {
-      return GameResult.thua;
-    }
-    return GameResult.thang;
-  } else if (player < machine) {
-    if (player == GameTurn.keo && machine == GameTurn.bao) {
-      return GameResult.thang;
-    }
-    return GameResult.thua;
-  } else {
-    return -1;
   }
+  // bua > keo
+  // keo > bao
+  // bao > bua
+  if ((player == GameTurn.bua && machine == GameTurn.keo) ||
+      (player == GameTurn.keo && machine == GameTurn.bao) ||
+      (player == GameTurn.bao && machine == GameTurn.bua)) {
+    return GameResult.thang;
+  }
+  return GameResult.thua;
 }
 
 void printResult(
     {required int player, required int machine, required int result}) {
   print(
-      "Player: ${getName(player)}\t Machine:${getName(machine)}\t => Bạn ${getName(result)}");
-}
-
-String getName(int number) {
-  switch (number) {
-    case 1:
-      return "Kéo";
-    case 2:
-      return "Búa";
-    case 3:
-      return "Bao";
-    case 4:
-      return "Thắng";
-    case 5:
-      return "Thua";
-    case 6:
-      return "Hòa";
-  }
-  return "N/A";
-}
-
-int whoWin(int player) {
-  var rng = Random();
-
-  int machine =
-      (rng.nextInt([GameTurn.keo, GameTurn.bua, GameTurn.bao].length) + 1);
-
-  switch (machine) {
-    case GameTurn.keo:
-      printResult(
-          player: player, machine: machine, result: rule(player, machine));
-
-      break;
-
-    case GameTurn.bua:
-      printResult(
-          player: player, machine: machine, result: rule(player, machine));
-      break;
-    case GameTurn.bao:
-      printResult(
-          player: player, machine: machine, result: rule(player, machine));
-      break;
-  }
-  return rule(player, machine);
-}
-
-int playGame(int player) {
-  int temp = 0;
-  switch (player) {
-    case GameTurn.keo:
-      temp = whoWin(player);
-      break;
-    case GameTurn.bua:
-      temp = whoWin(player);
-      break;
-    case GameTurn.bao:
-      temp = whoWin(player);
-      break;
-    case GameTurn.exit:
-      break;
-    default:
-      print("Input không hợp lệ");
-      break;
-  }
-  return temp;
+      "Player: ${GameTurn.getName(player)}\t Machine:${GameTurn.getName(machine)}\t => Bạn ${GameResult.getName(result)}");
 }
 
 void main() {
@@ -124,20 +77,31 @@ void main() {
   int lose = 0;
   while (true) {
     int player;
-    int temp;
 
     print("1-Kéo ,2-Búa, 3-Bao, 0-Exit : ");
-    player = int.parse(stdin.readLineSync().toString());
-
-    temp = playGame(player);
-    if (temp == GameResult.thua) {
-      lose++;
-    } else if (temp == GameResult.thang) {
-      win++;
+    try {
+      player = int.parse(stdin.readLineSync().toString());
+      if (player > 3 || player < 1) {
+        print("Input không hợp lệ");
+        continue;
+      }
+    } catch (_) {
+      print("Input không hợp lệ");
+      continue;
     }
-    if (player == 0) {
-      score(win, lose);
+    if (player == GameTurn.exit) {
+      showFinalScore(win, lose);
       break;
+    }
+
+    int machine = (Random().nextInt(3) + 1);
+    final result = rule(player, machine);
+    printResult(
+        player: player, machine: machine, result: rule(player, machine));
+    if (result == GameResult.thua) {
+      lose++;
+    } else if (result == GameResult.thang) {
+      win++;
     }
   }
 }
